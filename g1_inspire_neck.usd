@@ -1,0 +1,82 @@
+#usda 1.0
+(
+    defaultPrim = "g1_29dof_with_hand_rev_1_0"
+    metersPerUnit = 1
+    subLayers = [
+        @./g1_inspire.usd@
+    ]
+    upAxis = "Z"
+)
+
+over "g1_29dof_with_hand_rev_1_0"
+{
+    # Neck + ZED assembly, re-parented UNDER the robot defaultPrim (was a sibling
+    # root prim "/twist2_neck" brought in via subLayer, which Isaac Lab's
+    # UsdFileCfg reference would NOT pull in). Now referenced as a child of the
+    # robot root. The robot root is identity, so keeping the same translate
+    # preserves the exact world pose of the previous layout.
+    def Xform "twist2_neck" (
+        prepend references = @./neck_v9/twist2_neck_v9.usd@
+    )
+    {
+        double3 xformOp:translate = (0.02384, -0.00004, 0.44916)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        # disable the neck asset's standalone-sim scaffolding so it folds into
+        # the robot's single articulation via the neck_mount fixed joint below.
+        over "world" (
+            active = false
+        )
+        {
+        }
+
+        over "joints"
+        {
+            over "world_fixed" (
+                active = false
+            )
+            {
+            }
+        }
+
+        over "root_joint" (
+            active = false
+        )
+        {
+        }
+
+        over "tilt_link"
+        {
+            over "ZEDM" (
+                prepend references = @./neck_v9/zedm.usd@
+            )
+            {
+                quatf xformOp:orient = (-0.5, -0.5, 0.5, 0.5)
+                float3 xformOp:rotateXYZ = (0, -0.313, -90)
+                double3 xformOp:translate = (0.01403, -0.01534, 0.03088)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+
+                over "camera"
+                {
+                    # canonical xformOp order [translate, orient, scale] is required by
+                    # Isaac Lab's Camera sensor (XformPrimView). translate/scale are
+                    # identity, so the camera pose is unchanged.
+                    double3 xformOp:translate = (0, 0, 0)
+                    quatf xformOp:orient = (0.70710415, 0.70710415, 0.0019314175, -0.0019314175)
+                    float3 xformOp:scale = (1, 1, 1)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+                }
+            }
+        }
+    }
+
+    def PhysicsFixedJoint "neck_mount"
+    {
+        rel physics:body0 = </g1_29dof_with_hand_rev_1_0/torso_link>
+        rel physics:body1 = </g1_29dof_with_hand_rev_1_0/twist2_neck/neck_base>
+        point3f physics:localPos0 = (0.0278, -0.00004, 0.40516)
+        point3f physics:localPos1 = (0, 0, 0)
+        quatf physics:localRot0 = (1, 0, 0, 0)
+        quatf physics:localRot1 = (1, 0, 0, 0)
+    }
+}
