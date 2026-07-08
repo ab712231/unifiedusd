@@ -4,7 +4,7 @@ from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.sensors import CameraCfg
 
 camera_cfg = CameraCfg(
-    prim_path="{ENV_REGEX_NS}/Robot/g1_29dof_with_hand_rev_1_0/twist2_neck/tilt_link/ZEDM/camera",
+    prim_path="{ENV_REGEX_NS}/Robot/twist2_neck/tilt_link/ZEDM/camera",
     spawn=None,
     data_types=["rgb"],
     height=720,
