@@ -1,6 +1,16 @@
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg
 from isaaclab.actuators import ImplicitActuatorCfg
+from isaaclab.sensors import CameraCfg
+
+camera_cfg = CameraCfg(
+    prim_path="{ENV_REGEX_NS}/Robot/g1_29dof_with_hand_rev_1_0/twist2_neck/tilt_link/ZEDM/camera",
+    spawn=None,
+    data_types=["rgb"],
+    height=720,
+    width=1280,
+    update_period=0,
+)
 
 robot_cfg=ArticulationCfg(
     prim_path="/World/Robot", #sets the prim path so child things spawn oriented correctly to it
