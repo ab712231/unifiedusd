@@ -4,13 +4,16 @@ from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.sensors import CameraCfg
 import isaaclab.sim as _sim_utils_cam
 
+# Attach to the ZED camera prim already authored in g1_inspire_neck.usd
+# (tilt_link/ZEDM/camera) — it is deliberately oriented forward and given the
+# canonical xformOpOrder [translate, orient, scale] that Isaac Lab's Camera
+# sensor requires. spawn=None means "wrap this existing prim", so its authored
+# forward-facing orientation is used. Do NOT set spawn=PinholeCameraCfg here:
+# that would CREATE a new prim (zed_sim_cam) with default orientation, which
+# parents to tilt_link facing straight up and ignores the authored camera.
 camera_cfg = CameraCfg(
-    prim_path="{ENV_REGEX_NS}/Robot/twist2_neck/tilt_link/zed_sim_cam",
-    spawn=_sim_utils_cam.PinholeCameraCfg(
-        focal_length=2.12,
-        horizontal_aperture=5.76,
-        clipping_range=(0.1, 20.0),
-    ),
+    prim_path="{ENV_REGEX_NS}/Robot/twist2_neck/tilt_link/ZEDM/camera",
+    spawn=None,
     data_types=["rgb"],
     height=720,
     width=1280,
