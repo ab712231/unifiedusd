@@ -1,8 +1,16 @@
+import pathlib
+
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.sensors import CameraCfg
 import isaaclab.sim as _sim_utils_cam
+
+# Directory this config lives in — the USD assets sit alongside it. Loading the
+# robot USD relative to here means the sim always uses the same unifiedusd/ that
+# run_isaac_sim_loop.py imports this config from AND that _fix_usd_float_scales()
+# patches, instead of a hardcoded absolute path to some other copy.
+_UNIFIEDUSD_DIR = pathlib.Path(__file__).resolve().parent
 
 # Spawn a fresh ZED camera as a direct child of tilt_link (NOT under ZEDM).
 #
@@ -38,7 +46,7 @@ camera_cfg = CameraCfg(
 robot_cfg=ArticulationCfg(
     prim_path="/World/Robot", #sets the prim path so child things spawn oriented correctly to it
     spawn=sim_utils.UsdFileCfg(#spawn defines how to create the prim, set to do by loading a usd from a path
-        usd_path="/home/g1/Downloads/unifiedusd/g1_inspire_neck.usd",
+        usd_path=str(_UNIFIEDUSD_DIR / "g1_inspire_neck.usd"),
         rigid_props=sim_utils.RigidBodyPropertiesCfg(disable_gravity=False), #applying base physics properties to rigid bodies. gravity acts on mass and mass is a per body thing
     
     #setting properties of the articulation as a whole
