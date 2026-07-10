@@ -4,16 +4,31 @@ from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.sensors import CameraCfg
 import isaaclab.sim as _sim_utils_cam
 
-# Attach to the ZED camera prim already authored in g1_inspire_neck.usd
-# (tilt_link/ZEDM/camera) — it is deliberately oriented forward and given the
-# canonical xformOpOrder [translate, orient, scale] that Isaac Lab's Camera
-# sensor requires. spawn=None means "wrap this existing prim", so its authored
-# forward-facing orientation is used. Do NOT set spawn=PinholeCameraCfg here:
-# that would CREATE a new prim (zed_sim_cam) with default orientation, which
-# parents to tilt_link facing straight up and ignores the authored camera.
+# Spawn a fresh ZED camera as a direct child of tilt_link (NOT under ZEDM).
+#
+# Why not spawn=None on tilt_link/ZEDM/camera: wrapping the authored camera makes
+# Isaac Lab's Camera sensor traverse the ZEDM prim's transform stack, which
+# carries a scalar-float xformOp:scale in the source USD that XformPrimView can't
+# convert ("no registered converter ... from float"). Spawning under tilt_link
+# instead gives a clean, freshly-authored prim and never walks through ZEDM.
+#
+# The offset reproduces the authored camera's forward-facing pose relative to
+# tilt_link: rot (0.5, 0.5, -0.5, -0.5) puts camera forward (-Z) along robot +X
+# and camera up (+Y) along robot +Z (verified). Intrinsics match the ZED Mini:
+# focal 3.06mm + horizontal_aperture 5.91 → H-FOV 88°, and at 16:9 (1280x720)
+# the derived vertical aperture 3.324 → V-FOV 57° (exact spec); clip 0.1–15 m.
 camera_cfg = CameraCfg(
-    prim_path="{ENV_REGEX_NS}/Robot/twist2_neck/tilt_link/ZEDM/camera",
-    spawn=None,
+    prim_path="{ENV_REGEX_NS}/Robot/twist2_neck/tilt_link/zed_cam",
+    spawn=_sim_utils_cam.PinholeCameraCfg(
+        focal_length=3.06,
+        horizontal_aperture=5.91,
+        clipping_range=(0.1, 15.0),
+    ),
+    offset=CameraCfg.OffsetCfg(
+        pos=(0.01403, -0.01534, 0.03088),
+        rot=(0.5, 0.5, -0.5, -0.5),
+        convention="opengl",
+    ),
     data_types=["rgb"],
     height=720,
     width=1280,
